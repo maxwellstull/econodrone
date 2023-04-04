@@ -46,26 +46,30 @@ async def on_ready():
 
 @client.event 
 async def on_message(message):
-    if message.author.id not in appy.users:
-        appy.add_user(message.author)
-    if message.content.startswith("//"):
-        payload = message.content.replace("//","")
-        payload = payload.split(" ")
-        print(payload)
-        command = payload[0]
-        match command:
-            case "save":
-                appy.save_json()
-            case "load":
-                appy.load_json()
-            case "me":
-                appy.print_user(message.author.id)
-            case "help":
-                await message.channel.send(help_message())
-                
+    if message.author.id != 1092864433014968360:
+        if str(message.guild.id) not in appy.servers:
+            print("Shit, we need a new server dict")
+            appy.add_server(str(message.guild.id))
+        if str(message.author.id) not in appy.servers[str(message.guild.id)].users:
+            print("Adding new users")
+            appy.add_user(message)
+        if message.content.startswith("//"):
+            payload = message.content.replace("//","")
+            payload = payload.split(" ")
+            print(payload)
+            command = payload[0]
+            match command:
+                case "save":
+                    appy.save_json()
+                case "load":
+                    appy.load_json()
+                case "me":
+                    print("Me detected")
+                    await message.channel.send(appy.print_user(message))
+                case "help":
+                    await message.channel.send(help_message())
+    else:
+        print("Get outta here")
 
-    print(message)
-#    print(message.author.id)
-#    print(message.author.name)
 client.run(Token().token)
 

@@ -23,6 +23,8 @@ async def on_message(message):
         match command:
             case "save":
                 print("Saving")
+            case "load":
+                print("Loading")
 
 #    print(message)
 #    print(message.author.id)

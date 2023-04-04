@@ -7,7 +7,6 @@ from secret_token import Token
 client = discord.Client(intents=discord.Intents.all())
 appy = App()
 
-
 @client.event 
 async def on_ready():
     appy.load_json()
@@ -20,6 +19,10 @@ async def on_message(message):
         payload = message.content.replace("//","")
         payload = payload.split(" ")
         print(payload)
+        command = payload[0]
+        match command:
+            case "save":
+                print("Saving")
 
 #    print(message)
 #    print(message.author.id)

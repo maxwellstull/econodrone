@@ -1,7 +1,8 @@
 import os 
 import discord 
 from classes import App 
-TOKEN = "MTA5Mjg2NDQzMzAxNDk2ODM2MA.GqUsW7.AQNtgoONaexy9FdGEWdEwQJWhnXfx1O0GfHVnM"
+from secret_token import Token
+
 
 client = discord.Client(intents=discord.Intents.all())
 appy = App()
@@ -23,6 +24,6 @@ async def on_message(message):
 #    print(message)
 #    print(message.author.id)
 #    print(message.author.name)
-
-client.run(TOKEN)
+tolken = Token().token
+client.run(tolken)
 

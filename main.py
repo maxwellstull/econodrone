@@ -18,12 +18,10 @@ Player Commands:
     //remove --<unit> <amnt> - Removes money, see "add" for units
         Example: Same formats as add
     //balance - Bot will print out your current balance
-    //pay_player --<unit> <amnt> - Will spawn a context menu to choose player to send the money to
-        Example: //pay_player --g 10 --p 1
   ### FOOD
     //add_ration <amnt> - Adds rations to inventory
         Example: //add_ration 4 will add 4 rations
-    //remove_ration <amnt> - removes rations from inventory
+    //eat_ration <amnt> - removes rations from inventory
         Example: No.
     //add_water <amnt> - Adds water to inventory
         Example: See above.
@@ -62,14 +60,39 @@ async def on_message(message):
                 case "save":
                     appy.save_json()
                 case "load":
-                    appy.load_json()
+                    if message.author.id == 397851620408426506:
+                        appy.load_json()
+                    else:
+                        await message.channel.send("Fuck off you don't have permission to do this")
                 case "me":
-                    print("Me detected")
                     await message.channel.send(appy.print_user(message))
                 case "help":
                     await message.channel.send(help_message())
-    else:
-        print("Get outta here")
+                case "add":
+                    appy.add(message, payload)
+                case "remove":
+                    appy.remove(message, payload)
+                case "balance":
+                    await message.channel.send(appy.servers[str(message.guild.id)].users[str(message.author.id)].currency)
+                case "add_ration":
+                    appy.add_ration(message,payload)
+                case "eat_ration":
+                    appy.remove_ration(message,payload)
+                case "add_water":
+                    appy.add_water(message,payload)
+                case "drink_water":
+                    appy.drink_water(message,payload)
+                case "next_day":
+                    if message.author.id == 397851620408426506:
+                        appy.next_day(message)
+                    else:
+                        await message.channel.send("Fuck off you don't have permission to do this")
+                case "audit":
+                    if message.author.id == 397851620408426506:
+                        await message.channel.send(appy.audit(message))
+                    else:
+                        await message.channel.send("Fuck off you don't have permission to do this")
+            await message.add_reaction("\U0001F62B")
 
 client.run(Token().token)
 

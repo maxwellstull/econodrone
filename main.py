@@ -8,29 +8,37 @@ def help_message():
 Version 0.1 of econodrone, for tracking economy or economy-adjacent things in D&D.
 
 Player Commands:
-  ### GENERAL
-    //save - Saves all current active content to json
-    //me - prints user information
-  ### MONEY
-    //add --<unit> <amnt> - Adds money, unit is either 'p' for plat, 'g' for gold, or 'c' for copper.  
-        Example: //add --g 10   will add 10 gold
-        Example: //add --g 10 --p 1 will add 10 gold and 1 platinum
-    //remove --<unit> <amnt> - Removes money, see "add" for units
-        Example: Same formats as add
-    //balance - Bot will print out your current balance
-  ### FOOD
-    //add_ration <amnt> - Adds rations to inventory
-        Example: //add_ration 4 will add 4 rations
-    //eat_ration <amnt> - removes rations from inventory
-        Example: No.
-    //add_water <amnt> - Adds water to inventory
-        Example: See above.
-    //drink_water <amnt> - Slurp slurp slurp slurp
-
-Sudo Commands (require elevated rights):
-    //load - Loads content from json, OVERWRITING whatever is there
-    //next_day - Removes 1 ration and 1 water from all
-    //audit - Prints all players //me's
+  **GENERAL**
+    Typical commands.
+    `//save` - Saves all current active content to json
+    `//me` - prints user information
+  **MONEY**
+    All commands relating to money.
+    `//add --<unit> <amnt>` - Adds money, unit is either 'p' for plat, 'g' for gold, or 'c' for copper.  
+    `//remove --<unit> <amnt>` - Removes money, see "add" for units
+    `//balance` - Bot will print out your current balance
+  **FOOD**
+    All commands relating to food.
+    `//add_ration <amnt>` - Adds rations to inventory
+    `//eat_ration <amnt>` - removes rations from inventory
+  **HEALTH**
+    All command relating to health.
+    `//set_max_hp <amnt>` - Sets your maximum hp
+    `//set_hp <amnt>` - Sets your current hp
+    `//heal <amnt>` - Regenerate some health
+    `//damage <amnt>` - Take damage
+  **SPELLS**
+    Slot management. Along with spell slots, this can work for any class's points.
+        To do this, instead of a level, put what kind of point it is. It'll track it.
+    `//add_slots --<level> <amnt>` - Adds spell slots
+    `//set_slots --<level> <amnt>` - Overrides to the amount. Only supports 1 level at a time.
+    `//spell <level>` - Consumes 1 spell slot of that level
+    `//regenerate --<level> <amnt>` - Regerate specific slots
+  **Sudo Commands** (require elevated rights):
+    `//load` - Loads content from json, OVERWRITING whatever is there
+    `//next_day` - Removes 1 ration and 1 water from all
+    `//audit` - Prints all players //me's
+    `//long_rest` - Runs long rest on players health and spell slots
     """
 
 
@@ -48,7 +56,7 @@ async def on_message(message):
         if str(message.guild.id) not in appy.servers:
             print("Shit, we need a new server dict")
             appy.add_server(str(message.guild.id))
-        if str(message.author.id) not in appy.servers[str(message.guild.id)].users:
+        if str(message.author.id) not in str(appy.servers[str(message.guild.id)].users.keys()):
             print("Adding new users")
             appy.add_user(message)
         if message.content.startswith("//"):
@@ -82,6 +90,24 @@ async def on_message(message):
                     appy.add_water(message,payload)
                 case "drink_water":
                     appy.drink_water(message,payload)
+                case "set_max_hp":
+                    appy.set_max_health(message,payload)
+                case "set_hp":
+                    appy.set_hp(message, payload)
+                case "heal":
+                    appy.heal(message,payload)
+                case "damage":
+                    appy.damage(message,payload)
+                case "long_rest":
+                    appy.long_rest(message,payload)
+                case "add_slots":
+                    appy.add_slots(message, payload)
+                case "set_slots":
+                    appy.set_slots(message,payload)
+                case "spell":
+                    appy.spell(message, payload)
+                case "regenerate":
+                    appy.regenerate(message, payload)
                 case "next_day":
                     if message.author.id == 397851620408426506:
                         appy.next_day(message)

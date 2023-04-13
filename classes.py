@@ -109,9 +109,10 @@ class User():
         """.format(nm = self.name, nk=self.nick, m=str(self.currency), r=str(self.rations),h=self.health,mh=self.maxhealth, ss=str(self.spells))
     # Computation
     def compute_currency(self, payload, modifier):
-        for i in range(1, len(payload), 2):
-            coin_type = payload[i].replace("--","")
-            coin_amnt = int(payload[i+1])
+        for i in range(1, len(payload)):
+            data = payload[i].split("=")
+            coin_type = data[0]
+            coin_amnt = int(data[1])
             match coin_type:
                 case "p":
                     self.currency.plat = self.currency.plat + modifier*coin_amnt
@@ -130,9 +131,10 @@ class User():
         self.health = payload[1]
     #Slots
     def add_slots(self, payload):
-        for i in range(1, len(payload), 2):
-            level = payload[i].replace("--","")
-            amnt = payload[i+1]
+        for i in range(1, len(payload)):
+            data = payload[i].split("=")
+            level = data[0]
+            amnt = int(data[1])
             self.spells.add_slots(level, amnt)
     def set_slots(self, payload):
         level = payload[1]
@@ -142,9 +144,10 @@ class User():
         level = payload[1]
         self.spells.use(level)
     def regenerate(self, payload):
-        for i in range(1, len(payload), 2):
-            level = payload[i].replace("--","")
-            amnt = payload[i+1]
+        for i in range(1, len(payload)):
+            data = payload[i].split("=")
+            level = data[0]
+            amnt = int(data[1])
             self.spells.regenerate(level, amnt)
     def long_rest(self):
         self.health = self.maxhealth
@@ -257,19 +260,20 @@ class Inventory:
     def add_item(self,payload):
         new_item = Item()
         new_item.name = payload[1]
-        for i in range(2, len(payload), 2):
-            attr = payload[i]
-            data = payload[i+1]
+        for i in range(2, len(payload)):
+            data = payload[i].split("=")
+            attr = data[0]
+            val = data[1]
             print(attr, data)
             match attr:
                 case "amnt":
-                    new_item.amnt = data
+                    new_item.amnt = val
                 case "w" | "weight":
-                    new_item.weight = data
+                    new_item.weight = val
                 case "v" | "val" | "value":
-                    new_item.value = data
+                    new_item.value = val
                 case "d" | "desc":
-                    new_item.desc = data
+                    new_item.desc = val
         self.items[new_item.name] = new_item
     def edit(self, payload):
         pass

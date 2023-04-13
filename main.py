@@ -15,8 +15,8 @@ Player Commands:
     `//me` - prints user information
   **MONEY**
     All commands relating to money.
-    `//add --<unit> <amnt>` - Adds money, unit is either 'p' for plat, 'g' for gold, or 'c' for copper.  
-    `//remove --<unit> <amnt>` - Removes money, see "add" for units
+    `//add <unit>=<amnt>` - Adds money, unit is either 'p' for plat, 'g' for gold, or 'c' for copper.  
+    `//remove <unit>=<amnt>` - Removes money, see "add" for units
     `//balance` - Bot will print out your current balance
   **FOOD**
     All commands relating to food.
@@ -31,8 +31,8 @@ Player Commands:
   **SPELLS**
     Slot management. Along with spell slots, this can work for any class's points.
         To do this, instead of a level, put what kind of point it is. It'll track it.
-    `//add_slots --<level> <amnt>` - Adds spell slots
-    `//set_slots --<level> <amnt>` - Overrides to the amount. Only supports 1 level at a time.
+    `//add_slots <level>=<amnt>` - Adds spell slots
+    `//set_slots <level>=<amnt>` - Overrides to the amount. Only supports 1 level at a time.
     `//spell <level>` - Consumes 1 spell slot of that level
     `//regenerate --<level> <amnt>` - Regerate specific slots
   **Sudo Commands** (require elevated rights):

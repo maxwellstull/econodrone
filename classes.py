@@ -2,17 +2,12 @@ import json
 
 # App class, holds all the servers
 class App():
-    # Creation
     def __init__(self) -> None:
-        # Dict of all servers the bot is in. Users have different profiles based on server
         self.servers = {}
-    # Add users to the server they sent a message from
     def add_user(self, message):
         self.servers[str(message.guild.id)].add_user(message)
-    # Adds a new server
     def add_server(self, id):
         self.servers[id] = Server(id)
-    ## Save / Load ##
     def load_json(self):
         fp = open("savedata.json","r")
         to_load = json.load(fp)
@@ -28,15 +23,12 @@ class App():
         with open("savedata.json","w") as fp:
             json.dump(to_save, fp)
 
-
-
-        
-        
-
 class Server():
     def __init__(self,id) -> None:
         self.users = {}
         self.id = id
+    def __repr__(self):
+        return "User Ct: {ct}".format(ct=len(self.users))
     def load_json(self, json_data):
         self.id = json_data['id']
         for user_id, user in json_data['users'].items():
@@ -53,8 +45,6 @@ class Server():
     def add_user(self, message):
         print("Adding server user")
         self.users[str(message.author.id)] = User(message.author.id, message.author.name, message.author.nick)
-    def __repr__(self):
-        return "User Ct: {ct}".format(ct=len(self.users))
     def long_rest(self):
         for user_id, user in self.users.items():
             user.long_rest()

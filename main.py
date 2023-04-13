@@ -35,6 +35,11 @@ Player Commands:
     `//set_slots <level>=<amnt>` - Overrides to the amount. Only supports 1 level at a time.
     `//spell <level>` - Consumes 1 spell slot of that level
     `//regenerate --<level> <amnt>` - Regerate specific slots
+  **INVENTORY**
+    `//add_item amnt=<val> weight=<val> value=<val> desc="Description"` - Adds a new inventory item
+    `//edit_item <Name or number> (any of the fields above) - Edits an existing item
+    //full_inv - Prints longform of every item in your inventory
+
   **Sudo Commands** (require elevated rights):
     `//load` - Loads content from json, OVERWRITING whatever is there
     `//next_day` - Removes 1 ration and 1 water from all
@@ -110,6 +115,10 @@ async def on_message(message):
                     appy.servers[guild_id].users[user_id].regenerate(payload)
                 case "add_item":
                     appy.servers[guild_id].users[user_id].add_item(payload)
+                case "edit_item":
+                    appy.servers[guild_id].users[user_id].edit_item(payload)
+                case "full_inv":
+                    await message.channel.send(appy.servers[guild_id].users[user_id].print_inventory())
                 case "next_day" if user_id == OP_ID:
                     appy.servers[guild_id].next_day()
                 case "audit" if user_id == OP_ID:

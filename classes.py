@@ -145,6 +145,10 @@ class User():
         self.spells.long_rest()
     def add_item(self, payload):
         self.inv.add_item(payload)
+    def edit_item(self, payload):
+        self.inv.edit_item(payload)
+    def print_inventory(self):
+        return self.inv.print_inventory()
 class Money():
     def __init__(self) -> None:
         self.copper = 0
@@ -249,7 +253,8 @@ class Inventory:
         for key in json_data['items'].keys():
             self.items[key] = Item()
             self.items[key].load_json(json_data['items'][key])
-        self.alias = json_data['alias']
+        for key, data in json_data['alias'].items():
+            self.alias[int(key)] = data
     def add_item(self,payload):
         new_item = Item()
         new_item.name = payload[1]
@@ -270,9 +275,30 @@ class Inventory:
         self.items[new_item.name] = new_item
         self.alias[self.cur_num] = new_item.name
         self.cur_num += 1
-    def edit(self, payload):
-        pass
-
+    def edit_item(self, payload):
+        to_edit = None
+        if payload[1].isnumeric():
+            to_edit = self.items[self.alias[int(payload[1])]]
+        else:
+            to_edit = self.items[payload[1]]
+        for i in range(2, len(payload)):
+            data = payload[i].split("=")
+            attr = data[0]
+            val = data[1]
+            match attr:
+                case "amnt":
+                    to_edit.amnt = val
+                case "w" | "weight":
+                    to_edit.weight = val
+                case "v" | "val" | "value":
+                    to_edit.value = val
+                case "d" | "desc":
+                    to_edit.desc = val
+    def print_inventory(self):
+        retval = ""
+        for key, item in self.items.items():
+            retval += item.full_repr() + "\n"
+        return retval
 class Item:
     def __init__(self) -> None:
         self.name = ""
@@ -283,6 +309,9 @@ class Item:
         pass
     def __repr__(self) -> str:
         retval = "{nm} [x{am}]".format(nm=self.name, am=self.amnt)
+        return retval
+    def full_repr(self):
+        retval = "__{nm}__ [x{am}, {wt}lbs, {vl}g]: *{d}*".format(nm=self.name, am=self.amnt, wt=self.weight,vl=self.value, d=self.desc)
         return retval
     def save_json(self):
         return {"name":self.name,
@@ -296,3 +325,4 @@ class Item:
         self.weight = float(json_data['weight'])
         self.value = float(json_data['value'])
         self.desc = json_data['desc']
+    

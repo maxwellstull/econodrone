@@ -228,7 +228,7 @@ class Inventory:
         self.items = {}
         # Number and name
         self.alias = {}
-        cur_num = 1
+        self.cur_num = 1
         pass
     def __repr__(self) -> str:
         retval = ""
@@ -265,6 +265,8 @@ class Inventory:
                 case "d" | "desc":
                     new_item.desc = val
         self.items[new_item.name] = new_item
+        self.alias[self.cur_num] = new_item.name
+        self.cur_num += 1
     def edit(self, payload):
         pass
 

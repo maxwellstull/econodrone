@@ -77,6 +77,7 @@ class User():
         self.currency = Money()
         self.rations = Ration()
         self.spells = SpellSlots()
+        self.inv = Inventory()
     def load_json(self, json_data):
         self.id = json_data['id']
         self.name = json_data['name']
@@ -86,6 +87,7 @@ class User():
         self.currency.load_json(json_data['currency'])
         self.rations.load_json(json_data['rations'])
         self.spells.load_json(json_data["spellslots"])
+        self.inv.load_json(json_data['inventory'])
     def save_json(self):
         return {"id":self.id, 
                 "name":self.name, 
@@ -94,7 +96,8 @@ class User():
                 "maxhealth":self.maxhealth,
                 "currency":self.currency.save_json(), 
                 "rations":self.rations.save_json(),
-                "spellslots":self.spells.save_json()}
+                "spellslots":self.spells.save_json(),
+                "inventory":self.inv.save_json()}
     def __repr__(self) -> str:
         return """
         Name: {nm}
@@ -125,7 +128,6 @@ class User():
         self.maxhealth = payload[1]
     def set_hp(self, payload):
         self.health = payload[1]
-
     #Slots
     def add_slots(self, payload):
         for i in range(1, len(payload), 2):
@@ -147,6 +149,8 @@ class User():
     def long_rest(self):
         self.health = self.maxhealth
         self.spells.long_rest()
+    def add_item(self, payload):
+        self.inv.add_item(payload)
 class Money():
     def __init__(self) -> None:
         self.copper = 0
@@ -225,7 +229,6 @@ class SpellSlot():
         self.used -= int(amnt)
         if self.used < 0:
             self.used = 0
-
 class Inventory:
     def __init__(self) -> None:
         # Name and object
@@ -239,15 +242,25 @@ class Inventory:
         for number, name in self.alias.items():
             retval += "{num}: {item}".format(num=number, name=self.items[name])
     def save_json(self):
-        pass
+        retval = {}
+        ret_items = {}
+        for key, value in self.items.items():
+            ret_items[key] = value.save_json()
+        retval['items'] = ret_items
+        retval['alias'] = self.alias
+        return retval
     def load_json(self, json_data):
-        pass
-    def add(self,payload):
+        for key in json_data['items'].keys():
+            self.items[key] = Item()
+            self.items[key].load_json(json_data['items'][key])
+        self.alias = json_data['alias']
+    def add_item(self,payload):
         new_item = Item()
         new_item.name = payload[1]
         for i in range(2, len(payload), 2):
             attr = payload[i]
             data = payload[i+1]
+            print(attr, data)
             match attr:
                 case "amnt":
                     new_item.amnt = data
@@ -257,7 +270,7 @@ class Inventory:
                     new_item.value = data
                 case "d" | "desc":
                     new_item.desc = data
-        self.items[new_item.name] = Item()
+        self.items[new_item.name] = new_item
     def edit(self, payload):
         pass
 
@@ -272,6 +285,14 @@ class Item:
     def __repr__(self) -> str:
         pass 
     def save_json(self):
-        pass
+        return {"name":self.name,
+                "amnt":self.amnt,
+                "weight":self.weight,
+                "value":self.value,
+                "desc":self.desc,}
     def load_json(self, json_data):
-        pass
+        self.name = json_data["name"]
+        self.amnt = float(json_data["amnt"])
+        self.weight = float(json_data['weight'])
+        self.value = float(json_data['value'])
+        self.desc = json_data['desc']

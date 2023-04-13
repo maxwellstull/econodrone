@@ -1,6 +1,7 @@
 import os 
 import discord 
 from classes import App 
+import shlex
 from secret_token import Token
 
 def help_message():
@@ -41,6 +42,10 @@ Player Commands:
     `//long_rest` - Runs long rest on players health and spell slots
     """
 
+
+
+
+
 BOT_ID = 1092864433014968360
 OP_ID = 397851620408426506
 
@@ -62,8 +67,8 @@ async def on_message(message):
             appy.add_user(message)
         if message.content.startswith("//"):
             payload = message.content.replace("//","")
-            payload = payload.split(" ")
-            print(payload)
+            payload = shlex.split(payload)
+            print("Payload:",payload)
             command = payload[0]
             guild_id = str(message.guild.id)
             user_id = str(message.author.id)
@@ -103,6 +108,8 @@ async def on_message(message):
                     appy.servers[guild_id].users[user_id].spell(payload)
                 case "regenerate":
                     appy.servers[guild_id].users[user_id].regenerate(payload)
+                case "add_item":
+                    appy.servers[guild_id].users[user_id].add_item(payload)
                 case "next_day" if user_id == OP_ID:
                     appy.servers[guild_id].next_day()
                 case "audit" if user_id == OP_ID:

@@ -96,7 +96,8 @@ class User():
             Money: {m}
             Ration: {r}
         Slots:\n{ss}
-        """.format(nm = self.name, nk=self.nick, m=str(self.currency), r=str(self.rations),h=self.health,mh=self.maxhealth, ss=str(self.spells))
+        Inv: \n{invy}
+        """.format(nm = self.name, nk=self.nick, m=str(self.currency), r=str(self.rations),h=self.health,mh=self.maxhealth, ss=str(self.spells), invy=str(self.inv))
     # Computation
     def compute_currency(self, payload, modifier):
         for i in range(1, len(payload)):
@@ -175,6 +176,7 @@ class SpellSlots():
         retval = ""
         for level in sorted(list(self.slots.keys())):
             retval += "\t\t\t{le}: {ss}\n".format(le=level,ss=self.slots[level])
+        retval = retval.rstrip()
         return retval
     def save_json(self):
         retval = {}
@@ -233,7 +235,8 @@ class Inventory:
     def __repr__(self) -> str:
         retval = ""
         for number, name in self.alias.items():
-            retval += "{num}: {item}".format(num=number, name=self.items[name])
+            retval += "\t\t\t{num}: `{item}`".format(num=number, item=self.items[name])
+        return retval
     def save_json(self):
         retval = {}
         ret_items = {}
@@ -279,7 +282,8 @@ class Item:
         self.desc = ""
         pass
     def __repr__(self) -> str:
-        pass 
+        retval = "{nm} [x{am}]".format(nm=self.name, am=self.amnt)
+        return retval
     def save_json(self):
         return {"name":self.name,
                 "amnt":self.amnt,

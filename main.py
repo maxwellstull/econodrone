@@ -41,7 +41,8 @@ Player Commands:
     `//long_rest` - Runs long rest on players health and spell slots
     """
 
-
+BOT_ID = 1092864433014968360
+OP_ID = 397851620408426506
 
 client = discord.Client(intents=discord.Intents.all())
 appy = App()
@@ -52,7 +53,7 @@ async def on_ready():
 
 @client.event 
 async def on_message(message):
-    if message.author.id != 1092864433014968360:
+    if message.author.id != BOT_ID:
         if str(message.guild.id) not in appy.servers:
             print("Shit, we need a new server dict")
             appy.add_server(str(message.guild.id))
@@ -64,60 +65,50 @@ async def on_message(message):
             payload = payload.split(" ")
             print(payload)
             command = payload[0]
+            guild_id = str(message.guild.id)
+            user_id = str(message.author.id)
+
             match command:
                 case "save":
                     appy.save_json()
-                case "load":
-                    if message.author.id == 397851620408426506:
-                        appy.load_json()
-                    else:
-                        await message.channel.send("Fuck off you don't have permission to do this")
                 case "me":
-                    await message.channel.send(appy.print_user(message))
+                    await message.channel.send(appy.servers[guild_id].users[user_id])
                 case "help":
                     await message.channel.send(help_message())
                 case "add":
-                    appy.add(message, payload)
+                    appy.servers[guild_id].users[user_id].compute_currency(payload, 1)
                 case "remove":
-                    appy.remove(message, payload)
+                    appy.servers[guild_id].users[user_id].compute_currency(payload, -1)
                 case "balance":
-                    await message.channel.send(appy.servers[str(message.guild.id)].users[str(message.author.id)].currency)
+                    await message.channel.send(appy.servers[guild_id].users[user_id].currency)
                 case "add_ration":
-                    appy.add_ration(message,payload)
+                    appy.servers[guild_id].users[user_id].compute_ration(payload, 1)
                 case "eat_ration":
-                    appy.remove_ration(message,payload)
-                case "add_water":
-                    appy.add_water(message,payload)
-                case "drink_water":
-                    appy.drink_water(message,payload)
+                    appy.servers[guild_id].users[user_id].compute_ration(payload, -1)
                 case "set_max_hp":
-                    appy.set_max_health(message,payload)
+                    appy.servers[guild_id].users[user_id].set_max_health(payload)
                 case "set_hp":
-                    appy.set_hp(message, payload)
+                    appy.servers[guild_id].users[user_id].set_hp(payload)
                 case "heal":
-                    appy.heal(message,payload)
+                    appy.servers[guild_id].users[user_id].compute_health(payload, 1)
                 case "damage":
-                    appy.damage(message,payload)
+                    appy.servers[guild_id].users[user_id].compute_health(payload, -1)
                 case "long_rest":
-                    appy.long_rest(message,payload)
+                    appy.servers[guild_id].long_rest()
                 case "add_slots":
-                    appy.add_slots(message, payload)
+                    appy.servers[guild_id].users[user_id].add_slots(payload)
                 case "set_slots":
-                    appy.set_slots(message,payload)
+                    appy.servers[guild_id].users[user_id].set_slots(payload)
                 case "spell":
-                    appy.spell(message, payload)
+                    appy.servers[guild_id].users[user_id].spell(payload)
                 case "regenerate":
-                    appy.regenerate(message, payload)
-                case "next_day":
-                    if message.author.id == 397851620408426506:
-                        appy.next_day(message)
-                    else:
-                        await message.channel.send("Fuck off you don't have permission to do this")
-                case "audit":
-                    if message.author.id == 397851620408426506:
-                        await message.channel.send(appy.audit(message))
-                    else:
-                        await message.channel.send("Fuck off you don't have permission to do this")
+                    appy.servers[guild_id].users[user_id].regenerate(payload)
+                case "next_day" if user_id == OP_ID:
+                    appy.servers[guild_id].next_day()
+                case "audit" if user_id == OP_ID:
+                    await message.channel.send(appy.servers[guild_id].audit(message))
+                case "load" if user_id == OP_ID:
+                    appy.load_json()
             await message.add_reaction("\U0001F62B")
 
 client.run(Token().token)

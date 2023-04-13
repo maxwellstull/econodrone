@@ -1,14 +1,18 @@
 import json
 
+# App class, holds all the servers
 class App():
     # Creation
     def __init__(self) -> None:
+        # Dict of all servers the bot is in. Users have different profiles based on server
         self.servers = {}
+    # Add users to the server they sent a message from
     def add_user(self, message):
         self.servers[str(message.guild.id)].add_user(message)
+    # Adds a new server
     def add_server(self, id):
         self.servers[id] = Server(id)
-    # Save / Load
+    ## Save / Load ##
     def load_json(self):
         fp = open("savedata.json","r")
         to_load = json.load(fp)
@@ -23,54 +27,10 @@ class App():
             to_save[server_id] = server.save_json()
         with open("savedata.json","w") as fp:
             json.dump(to_save, fp)
-    # Currency
-    def add(self, message, payload): 
-        self.servers[str(message.guild.id)].compute(message, payload, 1)
-    def remove(self, message, payload):
-        self.servers[str(message.guild.id)].compute(message, payload, -1)
-    # Food
-    def add_ration(self, message, payload):
-        self.servers[str(message.guild.id)].compute_ration(message, payload, 1)
-    def remove_ration(self, message, payload):
-        self.servers[str(message.guild.id)].compute_ration(message, payload, -1)
-    def add_water(self, message, payload):
-        self.servers[str(message.guild.id)].compute_water(message, payload, 1)
-    def drink_water(self, message, payload):
-        self.servers[str(message.guild.id)].compute_water(message, payload, -1)
-    # Health
-    def set_max_health(self, message, payload):
-        self.servers[str(message.guild.id)].set_max_health(message, payload)
-    def set_hp(self, message, payload):
-        self.servers[str(message.guild.id)].set_hp(message, payload)
-    def heal(self, message, payload):
-        self.servers[str(message.guild.id)].compute_health(message, payload, 1)
-    def damage(self, message, payload):
-        self.servers[str(message.guild.id)].compute_health(message, payload, -1)
-    def long_rest(self, message, payload):
-        self.servers[str(message.guild.id)].long_rest(message, payload)
-    # Spell Slots
-    def add_slots(self, message, payload):
-        self.servers[str(message.guild.id)].add_slots(message, payload)
-    def set_slots(self, message, payload):
-        self.servers[str(message.guild.id)].set_slots(message, payload)
-    def spell(self, message, payload):
-        self.servers[str(message.guild.id)].spell(message, payload)
-    def regenerate(self, message, payload):
-        self.servers[str(message.guild.id)].regenerate(message, payload)
-    # DM Comments
-    def next_day(self,message):
-        for user in self.servers[str(message.guild.id)].users:
-            user.rations.food = user.rations.food - 1
-            user.rations.water = user.rations.water - 1
-    def audit(self, message):
-        retval = ""
-        for _id, user in self.servers[str(message.guild.id)].users.items():
-            retval += str(user)
-            retval += "\n\n"
-        return retval
-    # Misc
-    def print_user(self, message):
-        return self.servers[str(message.guild.id)].users[str(message.author.id)]
+
+
+
+        
         
 
 class Server():
@@ -95,39 +55,18 @@ class Server():
         self.users[str(message.author.id)] = User(message.author.id, message.author.name, message.author.nick)
     def __repr__(self):
         return "User Ct: {ct}".format(ct=len(self.users))
-    def compute(self, message, payload, modifier):
-        print(payload[1:])
-        for i in range(1, len(payload), 2):
-            coin_type = payload[i].replace("--","")
-            coin_amnt = int(payload[i+1])
-            match coin_type:
-                case "p":
-                    self.users[str(message.author.id)].currency.plat = self.users[str(message.author.id)].currency.plat + modifier*coin_amnt
-                case "g":
-                    self.users[str(message.author.id)].currency.gold = self.users[str(message.author.id)].currency.gold + modifier*coin_amnt
-                case "c":
-                    self.users[str(message.author.id)].currency.copper = self.users[str(message.author.id)].currency.copper + modifier*coin_amnt
-    def compute_ration(self, message, payload, modifier):
-        self.users[str(message.author.id)].rations.food += modifier*int(payload[1])
-    def compute_water(self, message, payload, modifier):
-        self.users[str(message.author.id)].rations.water += modifier*int(payload[1])
-    def compute_health(self, message, payload, modifier):
-        self.users[str(message.author.id)].health += modifier*int(payload[0])
-    def set_max_health(self, message, payload):
-        self.users[str(message.author.id)].set_max_health(payload)
-    def set_hp(self, message, payload):
-        self.users[str(message.author.id)].set_hp(payload)
-    def add_slots(self, message, payload):
-        self.users[str(message.author.id)].add_slots(payload)    
-    def set_slots(self, message, payload):
-        self.users[str(message.author.id)].set_slots(payload)
-    def spell(self, message, payload):
-        self.users[str(message.author.id)].spell(payload)
-    def regenerate(self, message, payload):
-        self.users[str(message.author.id)].regenerate(payload)
-    def long_rest(self, message, payload):
+    def long_rest(self):
         for user_id, user in self.users.items():
             user.long_rest()
+    def audit(self):
+        retval = ""
+        for _id, user in self.users.items():
+            retval += str(user)
+            retval += "\n\n"
+        return retval
+    def next_day(self):
+        for user in self.users:
+            user.rations.food = user.rations.food - 1
 class User():
     def __init__(self, id=0, name="", nick="") -> None:
         self.id = id 
@@ -142,8 +81,8 @@ class User():
         self.id = json_data['id']
         self.name = json_data['name']
         self.nick = json_data['nick']
-        self.health = json_data['health']
-        self.maxhealth = json_data['maxhealth']
+        self.health = int(json_data['health'])
+        self.maxhealth = int(json_data['maxhealth'])
         self.currency.load_json(json_data['currency'])
         self.rations.load_json(json_data['rations'])
         self.spells.load_json(json_data["spellslots"])
@@ -165,10 +104,29 @@ class User():
             Ration: {r}
         Slots:\n{ss}
         """.format(nm = self.name, nk=self.nick, m=str(self.currency), r=str(self.rations),h=self.health,mh=self.maxhealth, ss=str(self.spells))
+    # Computation
+    def compute_currency(self, payload, modifier):
+        for i in range(1, len(payload), 2):
+            coin_type = payload[i].replace("--","")
+            coin_amnt = int(payload[i+1])
+            match coin_type:
+                case "p":
+                    self.currency.plat = self.currency.plat + modifier*coin_amnt
+                case "g":
+                    self.currency.gold = self.currency.gold + modifier*coin_amnt
+                case "c":
+                    self.currency.copper = self.currency.copper + modifier*coin_amnt    
+    def compute_ration(self, payload, modifier):
+        self.rations.food += modifier*int(payload[1])
+    def compute_health(self, payload, modifier):
+        self.health += modifier*int(payload[1])
+    #Health
     def set_max_health(self, payload):
         self.maxhealth = payload[1]
     def set_hp(self, payload):
         self.health = payload[1]
+
+    #Slots
     def add_slots(self, payload):
         for i in range(1, len(payload), 2):
             level = payload[i].replace("--","")
@@ -203,20 +161,16 @@ class Money():
         self.copper = json_data['c']
         self.gold = json_data['g']
         self.plat = json_data['p']
-    
 class Ration():
     def __init__(self) -> None:
         self.food = 0
-        self.water = 0
     def __repr__(self) -> str:
-        retval = "[{fd} meals, {wt} gal]".format(fd=self.food,wt=self.water)
+        retval = "[{fd} meals]".format(fd=self.food)
         return retval
     def save_json(self):
-        return {"meals":self.food, "water":self.water}
+        return {"meals":self.food}
     def load_json(self, json_data):
         self.food = json_data['meals']
-        self.water = json_data['water']
-
 class SpellSlots():
     def __init__(self) -> None:
         self.slots = {}
@@ -241,7 +195,7 @@ class SpellSlots():
             self.slots[level] = SpellSlot()
             self.slots[level].total = int(amnt)
     def set_slots(self, level, amnt):
-        self.slots[level] = amnt
+        self.slots[level].total = int(amnt)
     def use(self, level):
         self.slots[level].use()
     def regenerate(self, level, amnt):
@@ -268,6 +222,56 @@ class SpellSlot():
     def use(self):
         self.used += 1
     def regenerate(self, amnt):
-        self.used -= amnt
+        self.used -= int(amnt)
         if self.used < 0:
             self.used = 0
+
+class Inventory:
+    def __init__(self) -> None:
+        # Name and object
+        self.items = {}
+        # Number and name
+        self.alias = {}
+        cur_num = 1
+        pass
+    def __repr__(self) -> str:
+        retval = ""
+        for number, name in self.alias.items():
+            retval += "{num}: {item}".format(num=number, name=self.items[name])
+    def save_json(self):
+        pass
+    def load_json(self, json_data):
+        pass
+    def add(self,payload):
+        new_item = Item()
+        new_item.name = payload[1]
+        for i in range(2, len(payload), 2):
+            attr = payload[i]
+            data = payload[i+1]
+            match attr:
+                case "amnt":
+                    new_item.amnt = data
+                case "w" | "weight":
+                    new_item.weight = data
+                case "v" | "val" | "value":
+                    new_item.value = data
+                case "d" | "desc":
+                    new_item.desc = data
+        self.items[new_item.name] = Item()
+    def edit(self, payload):
+        pass
+
+class Item:
+    def __init__(self) -> None:
+        self.name = ""
+        self.amnt = 1
+        self.weight = 0
+        self.value = 0
+        self.desc = ""
+        pass
+    def __repr__(self) -> str:
+        pass 
+    def save_json(self):
+        pass
+    def load_json(self, json_data):
+        pass

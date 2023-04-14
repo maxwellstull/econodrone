@@ -13,7 +13,7 @@ Player Commands:
     Typical commands.
     `//save` - Saves all current active content to json
     `//me` - prints user information
-    `//roll <ct>d<die>+<ct>d<die>+<const> - Rolls dice
+    `//roll <ct>d<die>+<ct>d<die>+<const>` - Rolls dice
   **MONEY**
     All commands relating to money.
     `//add <unit>=<amnt>` - Adds money, unit is either 'p' for plat, 'g' for gold, or 'c' for copper.  
@@ -100,19 +100,19 @@ async def on_message(message):
                     await message.channel.send(appy.servers[guild_id].users[user_id])
                 case "help":
                     await message.channel.send(help_message())
-                case "add":
+                case "add" | "add_money":
                     appy.servers[guild_id].users[user_id].compute_currency(payload, 1)
-                case "remove":
+                case "remove" | "spend_money":
                     appy.servers[guild_id].users[user_id].compute_currency(payload, -1)
-                case "balance":
+                case "balance" | "bal":
                     await message.channel.send(appy.servers[guild_id].users[user_id].currency)
                 case "add_ration":
                     appy.servers[guild_id].users[user_id].compute_ration(payload, 1)
-                case "eat_ration":
+                case "eat_ration" | "eat":
                     appy.servers[guild_id].users[user_id].compute_ration(payload, -1)
-                case "set_max_hp":
+                case "set_max_hp" | "max_hp":
                     appy.servers[guild_id].users[user_id].set_max_health(payload)
-                case "set_hp":
+                case "set_hp" | "hp":
                     appy.servers[guild_id].users[user_id].set_hp(payload)
                 case "heal":
                     appy.servers[guild_id].users[user_id].compute_health(payload, 1)

@@ -3,7 +3,7 @@ import discord
 from classes import App 
 import shlex
 from secret_token import Token
-
+import random
 def help_message():
     return """
 Version 0.1 of econodrone, for tracking economy or economy-adjacent things in D&D.
@@ -13,6 +13,7 @@ Player Commands:
     Typical commands.
     `//save` - Saves all current active content to json
     `//me` - prints user information
+    `//roll <ct>d<die>+<ct>d<die>+<const> - Rolls dice
   **MONEY**
     All commands relating to money.
     `//add <unit>=<amnt>` - Adds money, unit is either 'p' for plat, 'g' for gold, or 'c' for copper.  
@@ -38,7 +39,7 @@ Player Commands:
   **INVENTORY**
     `//add_item amnt=<val> weight=<val> value=<val> desc="Description"` - Adds a new inventory item
     `//edit_item <Name or number> (any of the fields above) - Edits an existing item
-    //full_inv - Prints longform of every item in your inventory
+    `//full_inv` - Prints longform of every item in your inventory
 
   **Sudo Commands** (require elevated rights):
     `//load` - Loads content from json, OVERWRITING whatever is there
@@ -47,8 +48,22 @@ Player Commands:
     `//long_rest` - Runs long rest on players health and spell slots
     """
 
-
-
+def roll(payload):
+    total = 0
+    results = []
+    rolls = payload[1].split("+")
+    for rolly in rolls:
+        if 'd' in rolly:
+            amnt = int(rolly.split('d')[0])
+            die = int(rolly.split('d')[1])
+            for i in range(0, amnt):
+                result = random.randint(1, die)
+                total += result
+                results.append(result)
+        else:
+            total += int(rolly)
+            results.append(int(rolly))
+    return total, results
 
 
 BOT_ID = 1092864433014968360
@@ -119,6 +134,10 @@ async def on_message(message):
                     appy.servers[guild_id].users[user_id].edit_item(payload)
                 case "full_inv":
                     await message.channel.send(appy.servers[guild_id].users[user_id].print_inventory())
+                case "roll":
+                    total, results = roll(payload)
+                    retval = "**{rl}**: `{rs}`".format(rl=total, rs=results)
+                    await message.channel.send(retval)
                 case "next_day" if user_id == OP_ID:
                     appy.servers[guild_id].next_day()
                 case "audit" if user_id == OP_ID:
